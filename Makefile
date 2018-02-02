@@ -1,4 +1,4 @@
-all:prequisite virtual-env ansible-awx docker 
+all:prequisite virtual-env ansible-awx docker ## install juniper-awx
 
 .PHONY: prequisite
 prequisite:
@@ -31,4 +31,3 @@ docker-stop: ## stop the docker
 
 clean: prequisite  ## clean the project
 	docker system prune -f
-
