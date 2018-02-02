@@ -2,8 +2,7 @@ all:prequisite virtual-env ansible-awx docker ## install juniper-awx
 
 .PHONY: prequisite
 prequisite:
-	rm -rf ./awx
-	rm -rf ./juniper-awx
+	rm -rf ./awx ./juniper-awx
 	
 .PHONY: virtual-env
 virtual-env:
