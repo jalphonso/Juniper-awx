@@ -1,8 +1,12 @@
-all:prequisite virtual-env ansible-awx docker ## install juniper-awx
+all:prequisite virtual-env ansible-awx playbook docker ## install juniper-awx
+
+PWD = $(shell pwd)
+PATH_PROJECTS = $(PWD)/projects
 
 .PHONY: prequisite
 prequisite:
-	rm -rf ./awx ./juniper-awx
+	rm -rf ./awx ./juniper-awx $(PATH_PROJECTS)        
+	mkdir $(PATH_PROJECTS)
 	
 .PHONY: virtual-env
 virtual-env:
@@ -13,9 +17,14 @@ virtual-env:
 .PHONY: ansible-awx
 ansible-awx:
 	. juniper-awx/bin/activate && \
-        git clone https://github.com/ansible/awx.git && \
-        ansible-playbook -i ./awx/installer/inventory ./awx/installer/install.yml
+        git clone https://github.com/ansible/awx.git
 	
+.PHONY: playbook
+playbook:
+	echo "project_data_dir=$(PATH_PROJECTS)" >> $(PWD)/awx/installer/inventory
+	. juniper-awx/bin/activate && \
+	ansible-playbook -i $(PWD)/awx/installer/inventory $(PWD)/awx/installer/install.yml
+
 .PHONY: docker
 docker:
 	docker exec -it awx_task pip install jsnapy jxmlease junos-eznc
