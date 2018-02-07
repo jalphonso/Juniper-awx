@@ -30,7 +30,7 @@ playbook:
 docker:
 	docker exec -it awx_task pip install jsnapy jxmlease junos-eznc
 	docker exec -it awx_task ansible-galaxy install Juniper.junos
-	docker exec -it awx_task /bin/bash -c 'echo -e roles_path=$(ANSIBLE_CFG_PATH) >> /etc/ansible/ansible.cfg'  
+	docker exec -it awx_task /bin/bash -c 'sed -i '/roles_path/s/^#//g' /etc/ansible/ansible.cfg'  
 
 docker-stop: ## stop the docker
 	docker stop awx_task 
