@@ -5,6 +5,7 @@ PATH_PROJECTS = $(PWD)/projects
  
 .PHONY: prequisite
 prequisite:
+	pip install virtualenv
 	rm -rf ./awx ./Juniper-awx $(PATH_PROJECTS)        
 	mkdir $(PATH_PROJECTS)
 	
