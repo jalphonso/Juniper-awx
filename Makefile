@@ -2,7 +2,8 @@ all:prequisite virtual-env ansible-awx playbook docker ## install juniper-awx
 
 PWD = $(shell pwd)
 PATH_PROJECTS = $(PWD)/projects
-
+ANSIBLE_CFG_PATH = /root/.ansible/roles
+ 
 .PHONY: prequisite
 prequisite:
 	rm -rf ./awx ./juniper-awx $(PATH_PROJECTS)        
@@ -21,7 +22,7 @@ ansible-awx:
 	
 .PHONY: playbook
 playbook:
-	echo "project_data_dir=$(PATH_PROJECTS)" >> $(PWD)/awx/installer/inventory
+	echo "\nproject_data_dir=$(PATH_PROJECTS)" >> $(PWD)/awx/installer/inventory
 	. juniper-awx/bin/activate && \
 	ansible-playbook -i $(PWD)/awx/installer/inventory $(PWD)/awx/installer/install.yml
 
@@ -29,6 +30,7 @@ playbook:
 docker:
 	docker exec -it awx_task pip install jsnapy jxmlease junos-eznc
 	docker exec -it awx_task ansible-galaxy install Juniper.junos
+	docker exec -it awx_task /bin/bash -c 'echo -e roles_path=$(ANSIBLE_CFG_PATH) >> /etc/ansible/ansible.cfg'  
 
 docker-stop: ## stop the docker
 	docker stop awx_task 
@@ -36,6 +38,13 @@ docker-stop: ## stop the docker
 	docker stop memcached
 	docker stop rabbitmq
 	docker stop postgres
+
+docker-clean: ##clean the docker
+	docker rm awx_task
+	docker rm awx_web
+	docker rm memcached
+	docker rm rabbitmq
+	docker rm postgres
 
 clean: prequisite  ## clean the project
 	docker system prune -f
