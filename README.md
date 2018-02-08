@@ -4,9 +4,12 @@ Juniper-awx provides a web-based user interface and task engine built on top of 
 operational and configuration tasks on devices running Junos OS using [ansible-junos-stdlib](https://github.com/Juniper/ansible-junos-stdlib.git).
 
 ## Requirements
+ Before you can run a deployment, you'll need the following installed in your local environment:
 
- [Docker](https://www.docker.com)
- pip module
+- [Docker](https://www.docker.com)
+- pip module
+- [GNU Make](https://ftp.gnu.org/gnu/make/)
+- [Git](https://git-scm.com/downloads) Requires Version 1.8.4+
 
 ## Installation
 
@@ -501,8 +504,8 @@ docker exec -it awx_task /bin/bash -c 'sed -i '/roles_path/s/^#//g' /etc/ansible
 ```
 
 ```
-## make docker-remove
- This command will stop and remove the docker container
+make docker-remove
+  This command will stop and remove the docker container
 
 $ make docker-remove
 docker stop awx_task
