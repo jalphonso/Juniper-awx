@@ -27,7 +27,7 @@ playbook:
 	@echo $(PATH_PROJECTS)
 ifneq '$(PATH_PROJECTS)' ''
 	sed -i '' '/project_data_dir/s/^#//g' $(PWD)/awx/installer/inventory
-	sed -i '' 's|project_data_dir=.*|project_data_dir=$(PATH_PROJECTS)|g' $(PWD)/awx/installer/inventory
+	sed -i '' 's|project_data_dir=.*|project_data_dir=$(PWD)/$(PATH_PROJECTS)|g' $(PWD)/awx/installer/inventory
 endif
 ifneq '$(DOCKERHUB_VERSION)' ''
 	sed -i '' 's/dockerhub_version=.*/dockerhub_version=$(DOCKERHUB_VERSION)/g' $(PWD)/awx/installer/inventory
