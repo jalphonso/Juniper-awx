@@ -6,8 +6,8 @@ include Makefile.variable
 .PHONY: prequisite
 prequisite:
 	pip install virtualenv
-	rm -rf ./awx ./Juniper-awx $(PATH_PROJECTS)        
-	mkdir $(PATH_PROJECTS)
+	rm -rf ./awx ./Juniper-awx $(PWD)/$(PATH_PROJECTS)        
+	mkdir -p $(PWD)/$(PATH_PROJECTS)
 	
 .PHONY: virtual-env
 virtual-env:
@@ -24,10 +24,10 @@ ansible-awx:
 playbook:
 	@echo $(DOCKERHUB_VERSION)
 	@echo $(POSTGRES_DATA_DIR)
-	@echo $(PATH_PROJECTS)
+	@echo $(PWD)/$(PATH_PROJECTS)
 ifneq '$(PATH_PROJECTS)' ''
 	sed -i '' '/project_data_dir/s/^#//g' $(PWD)/awx/installer/inventory
-	sed -i '' 's|project_data_dir=.*|project_data_dir=$(PATH_PROJECTS)|g' $(PWD)/awx/installer/inventory
+	sed -i '' 's|project_data_dir=.*|project_data_dir=$(PWD)/$(PATH_PROJECTS)|g' $(PWD)/awx/installer/inventory
 endif
 ifneq '$(DOCKERHUB_VERSION)' ''
 	sed -i '' 's/dockerhub_version=.*/dockerhub_version=$(DOCKERHUB_VERSION)/g' $(PWD)/awx/installer/inventory
