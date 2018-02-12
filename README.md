@@ -534,7 +534,7 @@ postgres
 ## Make.variable
 
 This file helps to pass arguments to make file.User can specific the path, name of the project and postgres data
-directory.Docker hub version helps to control the version of the project. 
+directory.Docker hub version helps to control the version of the docker. 
 
 ```
 PATH_PROJECTS = projects
