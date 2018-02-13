@@ -56,7 +56,6 @@ endif
 	. Juniper-awx/bin/activate && \
 	ansible-playbook -i $(PWD)/awx/installer/inventory $(PWD)/awx/installer/install.yml
 
-
 .PHONY: docker-exec
 docker-exec:
 	docker exec -it awx_task pip install jsnapy jxmlease junos-eznc
