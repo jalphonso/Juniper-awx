@@ -42,7 +42,7 @@ endif
 .PHONY: docker
 docker:
 	docker exec -it awx_task pip install jsnapy jxmlease junos-eznc
-	docker exec -it awx_task ansible-galaxy install Juniper.junos -p  /etc/ansible/roles
+	docker exec -it awx_task ansible-galaxy install Juniper.junos,$(ANSIBLE_JUNOS_VERSION) -p  /etc/ansible/roles
 	docker exec -it awx_task /bin/bash -c 'sed -i '/roles_path/s/^#//g' /etc/ansible/ansible.cfg'  
 
 .PHONY: docker-stop
