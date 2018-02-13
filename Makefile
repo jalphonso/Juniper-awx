@@ -53,7 +53,6 @@ ifneq '$(POSTGRES_DATA_DIR)' ''
 	mkdir -p ${POSTGRES_DATA_DIR}/{pg_tblspc,pg_twophase,pg_stat,pg_stat_tmp,pg_replslot,pg_snapshots}/.keep
 endif
 endif
-
 	. Juniper-awx/bin/activate && \
 	ansible-playbook -i $(PWD)/awx/installer/inventory $(PWD)/awx/installer/install.yml
 
