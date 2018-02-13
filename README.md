@@ -531,11 +531,16 @@ postgres
 
 ```
 
-## Make.variable
+## Makefile.variable
 
 This file helps to pass arguments to make file.User can specific the path, name of the project and postgres data
 directory.Docker hub version and ansible junos version helps to control the version of the docker and juniper
-ansible-galaxy respectively. 
+ansible-galaxy respectively.
+
+Note:
+- If postgres container keeps on restarting, source the POSTGRES_DATA_DIR into any other location other than /tmp.
+- Ensure docker has permission to bind the location mentioned in Makefile.variable
+
 
 ```
 Example:
