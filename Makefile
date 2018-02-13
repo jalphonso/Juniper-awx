@@ -50,6 +50,7 @@ ifneq '$(DOCKERHUB_VERSION)' ''
 endif
 ifneq '$(POSTGRES_DATA_DIR)' ''
 	sed -i 's|postgres_data_dir=.*|postgres_data_dir=$(POSTGRES_DATA_DIR)|g' $(PWD)/awx/installer/inventory
+	mkdir -p ${POSTGRES_DATA_DIR}/{pg_tblspc,pg_twophase,pg_stat,pg_stat_tmp,pg_replslot,pg_snapshots}/.keep
 endif
 endif
 

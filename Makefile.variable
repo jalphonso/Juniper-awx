@@ -1,3 +1,4 @@
 PATH_PROJECTS = projects
-DOCKERHUB_VERSION = 
-POSTGRES_DATA_DIR = /Users/jasminder/Documents/jasminder/Juniper-awx/pgdocker_data123
+DOCKERHUB_VERSION =
+POSTGRES_DATA_DIR =
+ANSIBLE_JUNOS_VERSION =
