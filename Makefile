@@ -1,4 +1,4 @@
-all:prequisite virtual-env ansible-awx playbook docker ## install juniper-awx
+all:prequisite virtual-env ansible-awx docker-start docker-exec ## install juniper-awx
 PWD = $(shell pwd)
 UNAME_S := $(shell uname -s)
 
@@ -21,8 +21,8 @@ ansible-awx:
 	. Juniper-awx/bin/activate && \
         git clone https://github.com/ansible/awx.git
 	
-.PHONY: playbook
-playbook:
+.PHONY: docker-start 
+docker-start:
 	@echo $(DOCKERHUB_VERSION)
 	@echo $(POSTGRES_DATA_DIR)
 	@echo $(PWD)/$(PATH_PROJECTS)
@@ -58,8 +58,8 @@ endif
 	ansible-playbook -i $(PWD)/awx/installer/inventory $(PWD)/awx/installer/install.yml
 
 
-.PHONY: docker
-docker:
+.PHONY: docker-exec
+docker-exec:
 	docker exec -it awx_task pip install jsnapy jxmlease junos-eznc
 	docker exec -it awx_task ansible-galaxy install Juniper.junos,$(ANSIBLE_JUNOS_VERSION) -p  /etc/ansible/roles
 	docker exec -it awx_task /bin/bash -c 'sed -i '/roles_path/s/^#//g' /etc/ansible/ansible.cfg'  
