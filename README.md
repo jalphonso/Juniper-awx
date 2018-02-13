@@ -534,12 +534,16 @@ postgres
 ## Make.variable
 
 This file helps to pass arguments to make file.User can specific the path, name of the project and postgres data
-directory.Docker hub version helps to control the version of the docker. 
+directory.Docker hub version and ansible junos version helps to control the version of the docker and juniper
+ansible-galaxy respectively. 
 
 ```
+Example:
+
 PATH_PROJECTS = projects
 DOCKERHUB_VERSION = 1.0.1
 POSTGRES_DATA_DIR = /srv/salt
+ANSIBLE_JUNOS_VERSION = 1.4.3
 ```
 
 
