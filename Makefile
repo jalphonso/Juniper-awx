@@ -1,8 +1,16 @@
-all:prequisite virtual-env ansible-awx docker-start docker-exec ## install juniper-awx
 PWD = $(shell pwd)
 UNAME_S := $(shell uname -s)
 
+ifeq ($(UNAME_S),Darwin)
+	SED := sed -i ''
+else
+	SED := sed -i
+endif
+
 include Makefile.variable
+
+all:prequisite virtual-env ansible-awx docker-start docker-exec ## install juniper-awx
+
  
 .PHONY: prequisite
 prequisite:
@@ -23,35 +31,18 @@ ansible-awx:
 	
 .PHONY: docker-start 
 docker-start:
-	@echo $(DOCKERHUB_VERSION)
-	@echo $(POSTGRES_DATA_DIR)
-	@echo $(PWD)/$(PATH_PROJECTS)
-	@echo $(UNAME_S)
-ifeq ($(UNAME_S),Darwin)
+	echo ${SED}
 ifneq '$(PATH_PROJECTS)' ''
-	sed -i '' '/project_data_dir/s/^#//g' $(PWD)/awx/installer/inventory
-	sed -i '' 's|project_data_dir=.*|project_data_dir=$(PWD)/$(PATH_PROJECTS)|g' $(PWD)/awx/installer/inventory
+	echo ${SED}
+	${SED} '/project_data_dir/s/^#//g' $(PWD)/awx/installer/inventory
+	${SED} 's|project_data_dir=.*|project_data_dir=$(PWD)/$(PATH_PROJECTS)|g' $(PWD)/awx/installer/inventory
 endif
 ifneq '$(DOCKERHUB_VERSION)' ''
-	sed -i '' 's/dockerhub_version=.*/dockerhub_version=$(DOCKERHUB_VERSION)/g' $(PWD)/awx/installer/inventory
+	${SED} 's/dockerhub_version=.*/dockerhub_version=$(DOCKERHUB_VERSION)/g' $(PWD)/awx/installer/inventory
 endif
 ifneq '$(POSTGRES_DATA_DIR)' ''
-	sed -i '' 's|postgres_data_dir=.*|postgres_data_dir=$(POSTGRES_DATA_DIR)|g' $(PWD)/awx/installer/inventory
+	${SED} 's|postgres_data_dir=.*|postgres_data_dir=$(POSTGRES_DATA_DIR)|g' $(PWD)/awx/installer/inventory
 	mkdir -p ${POSTGRES_DATA_DIR}/{pg_tblspc,pg_twophase,pg_stat,pg_stat_tmp,pg_replslot,pg_snapshots}/.keep
-endif
-
-else
-ifneq '$(PATH_PROJECTS)' ''
-	sed -i '/project_data_dir/s/^#//g' $(PWD)/awx/installer/inventory
-	sed -i 's|project_data_dir=.*|project_data_dir=$(PWD)/$(PATH_PROJECTS)|g' $(PWD)/awx/installer/inventory
-endif
-ifneq '$(DOCKERHUB_VERSION)' ''
-	sed -i 's/dockerhub_version=.*/dockerhub_version=$(DOCKERHUB_VERSION)/g' $(PWD)/awx/installer/inventory
-endif
-ifneq '$(POSTGRES_DATA_DIR)' ''
-	sed -i 's|postgres_data_dir=.*|postgres_data_dir=$(POSTGRES_DATA_DIR)|g' $(PWD)/awx/installer/inventory
-	mkdir -p ${POSTGRES_DATA_DIR}/{pg_tblspc,pg_twophase,pg_stat,pg_stat_tmp,pg_replslot,pg_snapshots}/.keep
-endif
 endif
 	. Juniper-awx/bin/activate && \
 	ansible-playbook -i $(PWD)/awx/installer/inventory $(PWD)/awx/installer/install.yml
