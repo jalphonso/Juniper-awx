@@ -31,18 +31,22 @@ ansible-awx:
 	
 .PHONY: docker-start 
 docker-start:
-	echo ${SED}
 ifneq '$(PATH_PROJECTS)' ''
-	echo ${SED}
-	${SED} '/project_data_dir/s/^#//g' $(PWD)/awx/installer/inventory
-	${SED} 's|project_data_dir=.*|project_data_dir=$(PWD)/$(PATH_PROJECTS)|g' $(PWD)/awx/installer/inventory
+	@${SED} '/project_data_dir/s/^#//g' $(PWD)/awx/installer/inventory
+	@${SED} 's|project_data_dir=.*|project_data_dir=$(PWD)/$(PATH_PROJECTS)|g' $(PWD)/awx/installer/inventory
 endif
 ifneq '$(DOCKERHUB_VERSION)' ''
-	${SED} 's/dockerhub_version=.*/dockerhub_version=$(DOCKERHUB_VERSION)/g' $(PWD)/awx/installer/inventory
+	@${SED} 's/dockerhub_version=.*/dockerhub_version=$(DOCKERHUB_VERSION)/g' $(PWD)/awx/installer/inventory
 endif
 ifneq '$(POSTGRES_DATA_DIR)' ''
-	${SED} 's|postgres_data_dir=.*|postgres_data_dir=$(POSTGRES_DATA_DIR)|g' $(PWD)/awx/installer/inventory
-	mkdir -p ${POSTGRES_DATA_DIR}/{pg_tblspc,pg_twophase,pg_stat,pg_stat_tmp,pg_replslot,pg_snapshots}/.keep
+	@${SED} 's|postgres_data_dir=.*|postgres_data_dir=$(POSTGRES_DATA_DIR)|g' $(PWD)/awx/installer/inventory
+	@mkdir -p ${POSTGRES_DATA_DIR}/pg_snapshots && touch ${POSTGRES_DATA_DIR}/pg_snapshots/.keep
+	@mkdir -p ${POSTGRES_DATA_DIR}/pg_replslot && touch ${POSTGRES_DATA_DIR}/pg_replslot/.keep
+	@mkdir -p ${POSTGRES_DATA_DIR}/pg_stat_tmp && touch ${POSTGRES_DATA_DIR}/pg_stat_tmp/.keep
+	@mkdir -p ${POSTGRES_DATA_DIR}/pg_stat && touch ${POSTGRES_DATA_DIR}/pg_stat/.keep
+	@mkdir -p ${POSTGRES_DATA_DIR}/pg_twophase && touch ${POSTGRES_DATA_DIR}/pg_twophase/.keep
+	@mkdir -p ${POSTGRES_DATA_DIR}/pg_tblspc && touch ${POSTGRES_DATA_DIR}/pg_tblspc/.keep
+
 endif
 	. Juniper-awx/bin/activate && \
 	ansible-playbook -i $(PWD)/awx/installer/inventory $(PWD)/awx/installer/install.yml
