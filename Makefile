@@ -7,33 +7,50 @@ else
 	SED := sed -i
 endif
 
+AWX_TASK = awx_task
+AWX_WEB = awx_web
+AWX_POSTGRES = postgres
+AWX_MEMCACHED = memcached
+AWX_RABBITMQ = rabbitmq
+
 include Makefile.variable
 
-all:prequisite virtual-env ansible-awx docker-start docker-exec ## install juniper-awx
-
+ifneq ($(UNAME_S),Darwin)
+  ifeq ($(DOCKER_COMPOSE),true)
+	AWX_TASK = awx_task_1
+	AWX_WEB = awx_web_1
+	AWX_POSTGRES = awx_postgres_1
+	AWX_MEMCACHED = awx_memcached_1
+	AWX_RABBITMQ = awx_rabbitmq_1
+  endif
+endif
  
-.PHONY: prequisite
-prequisite:
+all:prerequisite virtual-env ansible-awx docker-install docker-exec
+
+.PHONY: prerequisite
+prerequisite:
 	pip install virtualenv
-	rm -rf ./awx ./Juniper-awx $(PWD)/$(PATH_PROJECTS)        
-	mkdir -p $(PWD)/$(PATH_PROJECTS)
-	
+	rm -rf ./awx ./Juniper-awx
+
 .PHONY: virtual-env
 virtual-env:
 	virtualenv Juniper-awx --no-site-packages
 	. Juniper-awx/bin/activate && \
-	pip install ansible docker-py 
+	pip install -U pip && \
+	pip install ansible docker
 
 .PHONY: ansible-awx
 ansible-awx:
 	. Juniper-awx/bin/activate && \
-        git clone https://github.com/ansible/awx.git
+	git clone https://github.com/ansible/awx.git
 	
-.PHONY: docker-start 
-docker-start:
+
+.PHONY: docker-install
+docker-install:
+	. Juniper-awx/bin/activate
 ifneq '$(PATH_PROJECTS)' ''
 	@${SED} '/project_data_dir/s/^#//g' $(PWD)/awx/installer/inventory
-	@${SED} 's|project_data_dir=.*|project_data_dir=$(PWD)/$(PATH_PROJECTS)|g' $(PWD)/awx/installer/inventory
+	@${SED} 's|project_data_dir=.*|project_data_dir=$(PATH_PROJECTS)|g' $(PWD)/awx/installer/inventory
 endif
 ifneq '$(DOCKERHUB_VERSION)' ''
 	@${SED} 's/dockerhub_version=.*/dockerhub_version=$(DOCKERHUB_VERSION)/g' $(PWD)/awx/installer/inventory
@@ -50,36 +67,56 @@ endif
 ifneq '$(HOST_FILE)' ''
 	cp $(HOST_FILE) $(PWD)/$(PATH_PROJECTS)/hosts
 endif
-
-	. Juniper-awx/bin/activate && \
+ifeq ($(DOCKER_COMPOSE),true)
+	pip install docker-compose
+	@${SED} '/use_docker_compose/s/^# //g' $(PWD)/awx/installer/inventory
+	@${SED} 's|use_docker_compose=.*|use_docker_compose=$(DOCKER_COMPOSE)|g' $(PWD)/awx/installer/inventory
+endif
 	ansible-playbook -i $(PWD)/awx/installer/inventory $(PWD)/awx/installer/install.yml
 	sleep 30
 
 .PHONY: docker-exec
 docker-exec:
-	docker exec -it awx_task pip install jsnapy jxmlease junos-eznc
-	docker exec -it awx_task ansible-galaxy install Juniper.junos,$(ANSIBLE_JUNOS_VERSION) -p  /etc/ansible/roles
-	docker exec -it awx_task /bin/bash -c 'sed -i '/roles_path/s/^#//g' /etc/ansible/ansible.cfg'
+ifneq '$(ANSIBLE_GALAXY_JUNOS_VERSION)' ''
+	sed 's|ANSIBLE_GALAXY_JUNOS_VERSION|$(ANSIBLE_GALAXY_JUNOS_VERSION)|g' requirements.yml.template > requirements.yml
+else
+	sed '/ANSIBLE_GALAXY_JUNOS_VERSION/d' requirements.yml.template > requirements.yml
+endif
 ifneq '$(HOST_FILE)' ''	
 	curl -u admin:password --noproxy '*' http://localhost/api/v2/inventories/ --header "Content-Type: application/json" -x POST -d '{"name":"$(INVENTORY_NAME)" , "organization": 1}'
 	docker exec -it awx_task /bin/bash -c 'awx-manage inventory_import --source=/var/lib/awx/projects/hosts --inventory-name=$(INVENTORY_NAME) --overwrite'
 endif
+	docker exec -it $(AWX_TASK) pip install -U pip
+	docker exec -it $(AWX_TASK) pip install jsnapy jxmlease junos-eznc
+	docker cp requirements.yml $(AWX_TASK):/var/lib/awx/
+	docker exec -it $(AWX_TASK) ansible-galaxy install -r requirements.yml -p /etc/ansible/roles
+	docker exec -it $(AWX_TASK) /bin/bash -c 'sed -i '/roles_path/s/^#//g' /etc/ansible/ansible.cfg'
+	@echo AWX INSTALL IS COMPLETE
+	@echo END OF MAKEFILE
 
 .PHONY: docker-stop
-docker-stop: ## stop the docker
-	docker stop awx_task 
-	docker stop awx_web
-	docker stop memcached
-	docker stop rabbitmq
-	docker stop postgres
+docker-stop:
+	docker stop $(AWX_TASK)
+	docker stop $(AWX_WEB)
+	docker stop $(AWX_MEMCACHED)
+	docker stop $(AWX_RABBITMQ)
+	docker stop $(AWX_POSTGRES)
+
+.PHONY: docker-start
+docker-start:
+	docker start $(AWX_POSTGRES)
+	docker start $(AWX_TASK)
+	docker start $(AWX_WEB)
+	docker start $(AWX_MEMCACHED)
+	docker start $(AWX_RABBITMQ)
 
 .PHONY: docker-remove
-docker-remove: docker-stop ##clean the docker
-	docker rm awx_task
-	docker rm awx_web
-	docker rm memcached
-	docker rm rabbitmq
-	docker rm postgres
+docker-remove: docker-stop
+	docker rm $(AWX_TASK)
+	docker rm $(AWX_WEB)
+	docker rm $(AWX_MEMCACHED)
+	docker rm $(AWX_RABBITMQ)
+	docker rm $(AWX_POSTGRES)
 
-clean: prequisite  ## clean the project
+clean: prerequisite
 	docker system prune -f

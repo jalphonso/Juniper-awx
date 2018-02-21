@@ -1,0 +1,5 @@
+---
+
+- name: Juniper.junos
+  src: Juniper.junos
+  version: ANSIBLE_GALAXY_JUNOS_VERSION
