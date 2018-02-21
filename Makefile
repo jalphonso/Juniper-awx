@@ -53,6 +53,7 @@ endif
 
 	. Juniper-awx/bin/activate && \
 	ansible-playbook -i $(PWD)/awx/installer/inventory $(PWD)/awx/installer/install.yml
+	sleep 30
 
 .PHONY: docker-exec
 docker-exec:
