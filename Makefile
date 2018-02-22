@@ -46,16 +46,24 @@ ifneq '$(POSTGRES_DATA_DIR)' ''
 	@mkdir -p ${POSTGRES_DATA_DIR}/pg_stat && touch ${POSTGRES_DATA_DIR}/pg_stat/.keep
 	@mkdir -p ${POSTGRES_DATA_DIR}/pg_twophase && touch ${POSTGRES_DATA_DIR}/pg_twophase/.keep
 	@mkdir -p ${POSTGRES_DATA_DIR}/pg_tblspc && touch ${POSTGRES_DATA_DIR}/pg_tblspc/.keep
-
 endif
+ifneq '$(HOST_FILE)' ''
+	cp $(HOST_FILE) $(PWD)/$(PATH_PROJECTS)/hosts
+endif
+
 	. Juniper-awx/bin/activate && \
 	ansible-playbook -i $(PWD)/awx/installer/inventory $(PWD)/awx/installer/install.yml
+	sleep 30
 
 .PHONY: docker-exec
 docker-exec:
 	docker exec -it awx_task pip install jsnapy jxmlease junos-eznc
 	docker exec -it awx_task ansible-galaxy install Juniper.junos,$(ANSIBLE_JUNOS_VERSION) -p  /etc/ansible/roles
-	docker exec -it awx_task /bin/bash -c 'sed -i '/roles_path/s/^#//g' /etc/ansible/ansible.cfg'  
+	docker exec -it awx_task /bin/bash -c 'sed -i '/roles_path/s/^#//g' /etc/ansible/ansible.cfg'
+ifneq '$(HOST_FILE)' ''	
+	curl -u admin:password --noproxy '*' http://localhost/api/v2/inventories/ --header "Content-Type: application/json" -x POST -d '{"name":"$(INVENTORY_NAME)" , "organization": 1}'
+	docker exec -it awx_task /bin/bash -c 'awx-manage inventory_import --source=/var/lib/awx/projects/hosts --inventory-name=$(INVENTORY_NAME) --overwrite'
+endif
 
 .PHONY: docker-stop
 docker-stop: ## stop the docker
