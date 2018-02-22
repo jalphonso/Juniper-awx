@@ -1,6 +1,6 @@
 ## About
 
-Juniper-awx provides a web-based user interface and task engine built on top of [Ansible](https://github.com/ansible/ansible.git) which helps to perform specific
+ Ansible-junos-awx provides a web-based user interface and task engine built on top of [Ansible](https://github.com/ansible/ansible.git) which helps to perform specific
 operational and configuration tasks on devices running Junos OS using [ansible-junos-stdlib](https://github.com/Juniper/ansible-junos-stdlib.git).
 
 ## Requirements
