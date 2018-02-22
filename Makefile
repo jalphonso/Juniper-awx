@@ -15,14 +15,12 @@ AWX_RABBITMQ = rabbitmq
 
 include Makefile.variable
 
-ifneq ($(UNAME_S),Darwin)
-  ifeq ($(DOCKER_COMPOSE),true)
+ifeq ($(USE_DOCKER_COMPOSE),true)
 	AWX_TASK = awx_task_1
 	AWX_WEB = awx_web_1
 	AWX_POSTGRES = awx_postgres_1
 	AWX_MEMCACHED = awx_memcached_1
 	AWX_RABBITMQ = awx_rabbitmq_1
-  endif
 endif
  
 all:prerequisite virtual-env ansible-awx docker-install docker-exec
@@ -67,10 +65,10 @@ endif
 ifneq '$(HOST_FILE)' ''
 	cp $(HOST_FILE) $(PWD)/$(PATH_PROJECTS)/hosts
 endif
-ifeq ($(DOCKER_COMPOSE),true)
+ifeq ($(USE_DOCKER_COMPOSE),true)
 	pip install docker-compose
 	@${SED} '/use_docker_compose/s/^# //g' $(PWD)/awx/installer/inventory
-	@${SED} 's|use_docker_compose=.*|use_docker_compose=$(DOCKER_COMPOSE)|g' $(PWD)/awx/installer/inventory
+	@${SED} 's|use_docker_compose=.*|use_docker_compose=$(USE_DOCKER_COMPOSE)|g' $(PWD)/awx/installer/inventory
 endif
 	ansible-playbook -i $(PWD)/awx/installer/inventory $(PWD)/awx/installer/install.yml
 	sleep 30
@@ -83,8 +81,8 @@ else
 	sed '/ANSIBLE_GALAXY_JUNOS_VERSION/d' requirements.yml.template > requirements.yml
 endif
 ifneq '$(HOST_FILE)' ''	
-	curl -u admin:password --noproxy '*' http://localhost/api/v2/inventories/ --header "Content-Type: application/json" -x POST -d '{"name":"$(INVENTORY_NAME)" , "organization": 1}'
-	docker exec -it awx_task /bin/bash -c 'awx-manage inventory_import --source=/var/lib/awx/projects/hosts --inventory-name=$(INVENTORY_NAME) --overwrite'
+	curl -u admin:password --noproxy '*' http://127.0.0.1/api/v2/inventories/ --header "Content-Type: application/json" -x POST -d '{"name":"$(INVENTORY_NAME)" , "organization": 1}'
+	docker exec -it $(AWX_TASK) /bin/bash -c 'awx-manage inventory_import --source=/var/lib/awx/projects/hosts --inventory-name=$(INVENTORY_NAME) --overwrite'
 endif
 	docker exec -it $(AWX_TASK) pip install -U pip
 	docker exec -it $(AWX_TASK) pip install jsnapy jxmlease junos-eznc
