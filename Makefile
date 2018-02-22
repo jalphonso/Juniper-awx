@@ -60,7 +60,7 @@ docker-exec:
 	docker exec -it awx_task pip install jsnapy jxmlease junos-eznc
 	docker exec -it awx_task ansible-galaxy install Juniper.junos,$(ANSIBLE_JUNOS_VERSION) -p  /etc/ansible/roles
 	docker exec -it awx_task /bin/bash -c 'sed -i '/roles_path/s/^#//g' /etc/ansible/ansible.cfg'
-	curl -u admin:password --noproxy '*' http://localhost/api/v2/inventories/ --header "Content-Type: application/json" -k -v -x POST -d '{"name":"$(INVENTORY_NAME)" , "organization": 1}'
+	curl -u admin:password --noproxy '*' http://localhost/api/v2/inventories/ --header "Content-Type: application/json" -x POST -d '{"name":"$(INVENTORY_NAME)" , "organization": 1}'
 	docker exec -it awx_task /bin/bash -c 'awx-manage inventory_import --source=/var/lib/awx/projects/hosts --inventory-name=$(INVENTORY_NAME) --overwrite'
 
 .PHONY: docker-stop
